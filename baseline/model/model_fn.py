@@ -24,7 +24,7 @@ def build_model(mode, inputs, params):
         sentence = tf.nn.embedding_lookup(embeddings, sentence)
 
         # Apply LSTM over the embeddings
-        import pdb; pdb.set_trace()
+ 
         lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(params.lstm_num_units)
         intermediate_output, _  = tf.nn.dynamic_rnn(lstm_cell, sentence, dtype=tf.float32)
 
@@ -32,8 +32,9 @@ def build_model(mode, inputs, params):
         logits = tf.layers.dense(intermediate_output, params.intermediate_vector_size)
         
         # Our code: average over them
+        import pdb; pdb.set_trace()
         avg = tf.reduce_mean(logits, 1) # check that axis
-        output = tf.layers.dense(avg, 1, activation="sigmoid")
+        output = tf.layers.dense(avg, 1, activation=tf.nn.sigmoid)
 
     else:
         raise NotImplementedError("Unknown model version: {}".format(params.model_version))

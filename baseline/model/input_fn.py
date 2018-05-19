@@ -66,27 +66,9 @@ def input_fn(mode, sentences, labels, params):
     # import pdb; pdb.set_trace()
 
     # Create batches and pad the sentences of different length
-    # TODO: figure out how to change this to doing many-to-one instead of many-to-many
-#     padded_shapes = ((tf.TensorShape([None]),  # sentence of unknown size
-#                       tf.TensorShape([])),     # size(words)
-#                      (tf.TensorShape([]),      # want this to not pad at all
-#                       tf.TensorShape([])))     # size(tags)
-
-    padded_shapes = (
-        (tf.TensorShape([None]),  # sentence of unknown size
-                      tf.TensorShape([])
-        ),     # size(words)
-                     tf.TensorShape([])
-                     )     # size(tags)
-                     #(((tf.TensorShape([None]), tf.TensorShape([])), tf.TensorShape([])))
-
-#     padding_values = ((params.id_pad_word,   # sentence padded on the right with id_pad_word
-#                        0),                   # size(words) -- unused
-#                       (params.id_pad_word,   # should be unused, making it this for now
-#                        0))                   # size(tags) -- unused
-
-#    padding_values = ((params.id_pad_word,   # sentence padded on the right with id_pad_word
-#                        0))                   # size(tags) -- unused
+    padded_shapes = ((tf.TensorShape([None]),  # sentence of unknown size
+                      tf.TensorShape([])),     # size(words)
+                     tf.TensorShape([]))       # supposedly "size(tags)" from example, but idk
 
     # import pdb; pdb.set_trace()
     dataset = (dataset
@@ -99,13 +81,13 @@ def input_fn(mode, sentences, labels, params):
     iterator = dataset.make_initializable_iterator()
 
     # Query the output of the iterator for input to the model
-    ((sentence, sentence_lengths), (labels, _)) = iterator.get_next()
+    ((sentence, sentence_lengths), labels) = iterator.get_next()
     init_op = iterator.initializer
 
     # Build and return a dictionnary containing the nodes / ops
     inputs = {
         'sentence': sentence,
-        'labels': labels,
+        'labels': labels, # might be more of a single label
         'sentence_lengths': sentence_lengths,
         'iterator_init_op': init_op
     }
