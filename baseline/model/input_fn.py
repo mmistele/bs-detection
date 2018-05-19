@@ -36,7 +36,14 @@ def load_labels(path_txt):
         dataset: (tf.Dataset) yielding value for each example
     """
     # Load txt file, one example per line
-    return tf.data.TextLineDataset(path_txt)
+    # with open(path_txt) as f:
+    #     array = []
+    #     for line in f:
+    #         array.append([int(x) for x in line.split()[0]])
+
+    dataset = tf.data.TextLineDataset(path_txt)
+    dataset = dataset.map(lambda string: tf.cast(string, tf.int32))
+    return dataset
 
 
 def input_fn(mode, sentences, labels, params):
@@ -56,30 +63,35 @@ def input_fn(mode, sentences, labels, params):
 
     # Zip the sentence and the labels together
     dataset = tf.data.Dataset.zip((sentences, labels))
+    # import pdb; pdb.set_trace()
 
     # Create batches and pad the sentences of different length
     # TODO: figure out how to change this to doing many-to-one instead of many-to-many
-    padded_shapes = ((tf.TensorShape([None]),  # sentence of unknown size
-                      tf.TensorShape([])),     # size(words)
-                     (tf.TensorShape([]),      # want this to not pad at all
-                      tf.TensorShape([])))     # size(tags)
+#     padded_shapes = ((tf.TensorShape([None]),  # sentence of unknown size
+#                       tf.TensorShape([])),     # size(words)
+#                      (tf.TensorShape([]),      # want this to not pad at all
+#                       tf.TensorShape([])))     # size(tags)
 
-    # padded_shapes = ((tf.TensorShape([None]),  # sentence of unknown size
-    #                   tf.TensorShape([])),     # size(words)
-    #                  (tf.TensorShape([])))     # size(tags)
+    padded_shapes = (
+        (tf.TensorShape([None]),  # sentence of unknown size
+                      tf.TensorShape([])
+        ),     # size(words)
+                     tf.TensorShape([])
+                     )     # size(tags)
+                     #(((tf.TensorShape([None]), tf.TensorShape([])), tf.TensorShape([])))
 
-    padding_values = ((params.id_pad_word,   # sentence padded on the right with id_pad_word
-                       0),                   # size(words) -- unused
-                      (params.id_pad_word,   # should be unused, making it this for now
-                       0))                   # size(tags) -- unused
+#     padding_values = ((params.id_pad_word,   # sentence padded on the right with id_pad_word
+#                        0),                   # size(words) -- unused
+#                       (params.id_pad_word,   # should be unused, making it this for now
+#                        0))                   # size(tags) -- unused
 
 #    padding_values = ((params.id_pad_word,   # sentence padded on the right with id_pad_word
 #                        0))                   # size(tags) -- unused
 
-
+    # import pdb; pdb.set_trace()
     dataset = (dataset
         .shuffle(buffer_size=buffer_size)
-        .padded_batch(params.batch_size, padded_shapes=([None], []), padding_values=(params.id_pad_word, None))
+        .padded_batch(params.batch_size, padded_shapes=padded_shapes, padding_values=((params.id_pad_word, 0), 0))
         .prefetch(1)  # make sure you always have one batch ready to serve
     )
 
