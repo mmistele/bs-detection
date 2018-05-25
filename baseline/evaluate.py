@@ -11,7 +11,7 @@ from model.utils import Params
 from model.utils import set_logger
 from model.evaluation import evaluate
 from model.input_fn import input_fn
-from model.input_fn import load_dataset_from_text
+from model.input_fn import load_dataset_from_text, load_labels
 from model.model_fn import model_fn
 
 
@@ -54,12 +54,11 @@ if __name__ == '__main__':
     # Create the input data pipeline
     logging.info("Creating the dataset...")
     test_sentences = load_dataset_from_text(path_eval_sentences, words)
-    test_labels = load_dataset_from_text(path_eval_labels, tags)
+    test_labels = load_labels(path_eval_labels)
 
     # Specify other parameters for the dataset and the model
     params.eval_size = params.test_size
     params.id_pad_word = words.lookup(tf.constant(params.pad_word))
-    params.id_pad_tag = tags.lookup(tf.constant(params.pad_tag))
 
     # Create iterator over the test set
     inputs = input_fn('eval', test_sentences, test_labels, params)

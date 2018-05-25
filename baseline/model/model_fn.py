@@ -1,6 +1,7 @@
 """Define the model."""
 
 import tensorflow as tf
+import numpy as np
 
 
 def build_model(mode, inputs, params):
@@ -29,11 +30,12 @@ def build_model(mode, inputs, params):
         intermediate_output, _  = tf.nn.dynamic_rnn(lstm_cell, sentence, dtype=tf.float32)
 
         # Compute logits from the output of the LSTM
+        # Note: might want to remove this for now and just use intermediate_output
         logits = tf.layers.dense(intermediate_output, params.intermediate_vector_size)
         
         # Our code: average over them
-        import pdb; pdb.set_trace()
-        avg = tf.reduce_mean(logits, 1) # check that axis
+        # TODO: elementwise-mutliply with pad mask
+        avg = tf.reduce_mean(logits, axis=1) # check that axis
         output = tf.layers.dense(avg, 1, activation=tf.nn.sigmoid)
 
     else:
@@ -64,9 +66,11 @@ def model_fn(mode, inputs, params, reuse=False):
     with tf.variable_scope('model', reuse=reuse):
         # Compute the output distribution of the model and the predictions
         _, output = build_model(mode, inputs, params)
-        predictions = output > 0.5 # TODO: make predictions have 0/1 instead of True/False
+        predictions = tf.cast(output > 0.5, tf.int32)
 
     # Define loss and accuracy
+    output = tf.squeeze(output)
+    # labels = tf.reshape(labels, (labels.get_shape()[0], 1))
     loss = tf.losses.sigmoid_cross_entropy(labels, output)
     accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predictions), tf.float32))
 

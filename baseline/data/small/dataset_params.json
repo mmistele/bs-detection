@@ -1,8 +1,8 @@
 {
     "train_size": 10,
     "dev_size": 10,
-    "test_size": 10,
-    "vocab_size": 5,
+    "test_size": 100920,
+    "vocab_size": 4,
     "intermediate_vector_size": 10,
     "pad_word": "<pad>",
     "num_oov_buckets": 1

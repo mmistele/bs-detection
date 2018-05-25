@@ -36,13 +36,15 @@ def load_labels(path_txt):
         dataset: (tf.Dataset) yielding value for each example
     """
     # Load txt file, one example per line
-    # with open(path_txt) as f:
-    #     array = []
-    #     for line in f:
-    #         array.append([int(x) for x in line.split()[0]])
+    array = []
+    with open(path_txt) as f:
+        for line in f:
+            array.append([int(x) for x in line.split()[0]])
+    labels = tf.convert_to_tensor(array, tf.int32)
+    dataset = tf.data.Dataset.from_tensor_slices(labels)
 
-    dataset = tf.data.TextLineDataset(path_txt)
-    dataset = dataset.map(lambda string: tf.cast(string, tf.int32))
+    # dataset = tf.data.TextLineDataset(path_txt)
+    # dataset = dataset.map(lambda string: tf.cast(string, tf.int32))
     return dataset
 
 
@@ -63,12 +65,11 @@ def input_fn(mode, sentences, labels, params):
 
     # Zip the sentence and the labels together
     dataset = tf.data.Dataset.zip((sentences, labels))
-    # import pdb; pdb.set_trace()
 
     # Create batches and pad the sentences of different length
     padded_shapes = ((tf.TensorShape([None]),  # sentence of unknown size
                       tf.TensorShape([])),     # size(words)
-                     tf.TensorShape([]))       # supposedly "size(tags)" from example, but idk
+                     tf.TensorShape([1]))       # supposedly "size(tags)" from example, but idk
 
     # import pdb; pdb.set_trace()
     dataset = (dataset
@@ -76,6 +77,8 @@ def input_fn(mode, sentences, labels, params):
         .padded_batch(params.batch_size, padded_shapes=padded_shapes, padding_values=((params.id_pad_word, 0), 0))
         .prefetch(1)  # make sure you always have one batch ready to serve
     )
+
+    import pdb; pdb.set_trace();
 
     # Create initializable iterator from this dataset so that we can reset at each epoch
     iterator = dataset.make_initializable_iterator()
