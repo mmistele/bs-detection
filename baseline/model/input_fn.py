@@ -78,7 +78,7 @@ def input_fn(mode, sentences, labels, params):
         .prefetch(1)  # make sure you always have one batch ready to serve
     )
 
-    import pdb; pdb.set_trace();
+    # dataset = tf.Print(dataset, dataset)
 
     # Create initializable iterator from this dataset so that we can reset at each epoch
     iterator = dataset.make_initializable_iterator()

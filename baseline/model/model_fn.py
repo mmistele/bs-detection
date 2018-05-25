@@ -36,7 +36,7 @@ def build_model(mode, inputs, params):
         # Our code: average over them
         # TODO: elementwise-mutliply with pad mask
         avg = tf.reduce_mean(logits, axis=1) # check that axis
-        output = tf.layers.dense(avg, 1, activation=tf.nn.sigmoid)
+        output = tf.layers.dense(avg, 1, activation=None)
 
     else:
         raise NotImplementedError("Unknown model version: {}".format(params.model_version))
@@ -66,7 +66,9 @@ def model_fn(mode, inputs, params, reuse=False):
     with tf.variable_scope('model', reuse=reuse):
         # Compute the output distribution of the model and the predictions
         _, output = build_model(mode, inputs, params)
-        predictions = tf.cast(output > 0.5, tf.int32)
+        predictions = tf.cast(output > 0.0, tf.int32)
+
+    predictions = tf.Print(predictions, [output], summarize=10)
 
     # Define loss and accuracy
     output = tf.squeeze(output)
