@@ -17,25 +17,40 @@ def build_model(mode, inputs, params):
         output: (tf.Tensor) output of the model
     """
     sentence = inputs['sentence']
+    sentence_lengths = inputs['sentence_lengths']
+
 
     if params.model_version == 'lstm':
         # Get word embeddings for each token in the sentence
         embeddings = tf.get_variable(name="embeddings", dtype=tf.float32,
-                shape=[params.vocab_size, params.embedding_size])
+                shape=[params.vocab_size, params.embedding_size]) # where is "embeddings" getting set??
         sentence = tf.nn.embedding_lookup(embeddings, sentence)
+
+        # sentence = tf.Print(sentence, [sentence], summarize=400)
+        # sentence = tf.Print(sentence, [sentence.shape], summarize=100)
 
         # Apply LSTM over the embeddings
  
         lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(params.lstm_num_units)
-        intermediate_output, _  = tf.nn.dynamic_rnn(lstm_cell, sentence, dtype=tf.float32)
+        logits, _  = tf.nn.dynamic_rnn(lstm_cell, sentence, dtype=tf.float32)
+        print(logits.shape)
 
-        # Compute logits from the output of the LSTM
-        # Note: might want to remove this for now and just use intermediate_output
-        logits = tf.layers.dense(intermediate_output, params.intermediate_vector_size)
+        # Extra layer
+        # logits = tf.layers.dense(logits, params.intermediate_vector_size)
         
-        # Our code: average over them
-        # TODO: elementwise-mutliply with pad mask
+        # Our code: mask out the pad words and average over the remaining
+        # logits = tf.Print(logits, [logits], summarize = 100)
+        print(sentence_lengths)
+
+        logits = tf.Print(logits, [sentence_lengths], summarize = 4)
+
+        # mask = tf.sequence_mask(sentence_lengths)
+        # logits = tf.boolean_mask(logits, mask)
+        # logits = tf.Print(logits, [logits], summarize = 100)
+        # print(logits.shape)
+
         avg = tf.reduce_mean(logits, axis=1) # check that axis
+        print(avg.shape)
         output = tf.layers.dense(avg, 1, activation=None)
 
     else:
@@ -68,12 +83,15 @@ def model_fn(mode, inputs, params, reuse=False):
         _, output = build_model(mode, inputs, params)
         predictions = tf.cast(output > 0.0, tf.int32)
 
-    predictions = tf.Print(predictions, [output], summarize=10)
-
+    predictions = tf.Print(predictions, [predictions, output], summarize=10)
+    labels = tf.Print(labels, [labels], summarize=10)
     # Define loss and accuracy
     output = tf.squeeze(output)
     # labels = tf.reshape(labels, (labels.get_shape()[0], 1))
+
+    # Define loss and accuracy 
     loss = tf.losses.sigmoid_cross_entropy(labels, output)
+    # loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = labels, logits = output)
     accuracy = tf.reduce_mean(tf.cast(tf.equal(labels, predictions), tf.float32))
 
     # Define training step that minimizes the loss with the Adam optimizer

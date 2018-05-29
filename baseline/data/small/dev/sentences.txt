@@ -1,10 +1,1 @@
-cats eat mice
-mice eat cats
-cats eat
-mice eat
-eat
-mice mice mice
-eat cats mice
-cats
-mice cats
-eat eat
+cats cats
