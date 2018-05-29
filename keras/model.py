@@ -36,7 +36,10 @@ def sentences_to_indices(X, word_to_index, max_len):
         sentence_words = X[i].lower().split()
         j = 0
         for w in sentence_words:
-            X_indices[i, j] = word_to_index[w]
+            if w not in word_to_index:
+               X_indices[i, j] = 0 # HACK - FIX SOON
+            else:
+                X_indices[i, j] = word_to_index[w]
             j = j+1
     return X_indices
 
