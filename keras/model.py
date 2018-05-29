@@ -9,9 +9,6 @@ from keras.initializers import glorot_uniform
 X_train, Y_train = read_csv('data/train.csv') 
 X_test, Y_test = read_csv('data/test.csv') 
 
-print(X_train[1])
-print(Y_train[1])
-
 maxLen = len(max(X_train, key=len).split())
 
 word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('data/glove.6B.50d.txt')
