@@ -114,5 +114,6 @@ model.fit(X_train_indices, Y_train, epochs = 20, batch_size = 6, shuffle=True)
 
 X_test_indices = sentences_to_indices(X_test, word_to_index, max_len = maxLen)
 loss, acc = model.evaluate(X_test_indices, Y_test)
+model.save('my_model.h5')
 print()
 print("Test accuracy = ", acc)
