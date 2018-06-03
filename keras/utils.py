@@ -1,5 +1,7 @@
 import csv
 import numpy as np
+from collections import Counter
+
 # import pandas as pd
 # import matplotlib.pyplot as plt
 # from sklearn.metrics import confusion_matrix
@@ -40,9 +42,24 @@ def read_csv(filename):
 
     return X, Y
 
-# def convert_to_one_hot(Y, C):
-#     Y = np.eye(C)[Y.reshape(-1)]
-#     return Y
+def get_char_counts_from_csv(filename):
+    counts = Counter()
+
+    with open (filename) as csvDataFile:
+        csvReader = csv.reader(csvDataFile)
+
+        for row in csvReader:
+            counts += Counter(row[0].lower())
+    return counts
+
+def convert_to_one_hot(Y, C):
+    Y = np.eye(C)[Y.reshape(-1)]
+    return Y
+
+def index_to_one_hot(idx, length):
+    vec = np.zeros((length, 1))
+    vec[idx] = 1
+    return vec
 
 def label_to_judgment(label):
     return "real" if int(label) == 1 else "fake"
