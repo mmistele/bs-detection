@@ -6,8 +6,8 @@ from keras.layers.embeddings import Embedding
 from keras.preprocessing import sequence
 from keras.initializers import glorot_uniform
 
-X_train, Y_train = read_csv('data/train.csv') 
-X_test, Y_test = read_csv('data/test.csv') 
+X_train, Y_train = read_csv('data/train-big.csv') 
+X_test, Y_test = read_csv('data/test-big.csv') 
 
 maxLen = len(max(X_train, key=len).split())
 
@@ -114,6 +114,6 @@ model.fit(X_train_indices, Y_train, epochs = 20, batch_size = 6, shuffle=True)
 
 X_test_indices = sentences_to_indices(X_test, word_to_index, max_len = maxLen)
 loss, acc = model.evaluate(X_test_indices, Y_test)
-model.save('my_model.h5')
+model.save('my_model_big.h5')
 print()
 print("Test accuracy = ", acc)
