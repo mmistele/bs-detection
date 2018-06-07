@@ -11,12 +11,14 @@ from utils import *
 # pdb.set_trace()
 model = load_model('character_model.h5')
 
-X_trained_on, _ = read_csv('data/train-debug.csv')
+X_trained_on, _ = read_csv('data/train.csv')
+X_dev, Y_dev = read_csv('data/dev.csv')
 
-X, Y = read_csv('data/test-debug.csv')
+X, Y = read_csv('data/debug.csv')
 
-maxLen = len(max(X_trained_on, key=len))
-counts = get_char_counts_from_csv('data/train-debug.csv') + get_char_counts_from_csv('data/test-debug.csv') 
+maxLen = max(len(max(X_trained_on, key=len)), len(max(X_dev, key=len)))
+
+counts = get_char_counts_from_csv('data/train.csv') + get_char_counts_from_csv('data/dev.csv') 
 most_common = counts.most_common()
 char_to_index = {x:i for i, (x, _) in enumerate(most_common)}
 index_to_char = {i:x for i, (x, _) in enumerate(most_common)}
