@@ -31,12 +31,12 @@ char_to_vec_map = {x : index_to_one_hot(i, alphabet_size) for i, (x, _) in enume
 X_train_indices = strings_to_character_vecs(X_train, char_to_index, maxLen, alphabet_size)
 print(X_train_indices.shape)
 
-model = Character_Model_2((X_train_indices.shape[1], X_train_indices.shape[2]))
+model = Character_Model_1((None, X_train_indices.shape[2]))
 
 optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, decay=0.0, epsilon=None)
-model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy', 'loss'])
 tensorboard = TensorBoard(log_dir="logs/character-model/{}".format(time()))
-model.fit(X_train_indices, Y_train, epochs = 20, batch_size = 6, shuffle=True, callbacks = [tensorboard])
+model.fit(X_train_indices, Y_train, epochs = 1, batch_size = 6, shuffle=True, callbacks = [tensorboard], validation_split = 0.2)
 
 X_dev_indices = strings_to_character_vecs(X_dev, char_to_index, maxLen, alphabet_size)
 loss, acc = model.evaluate(X_dev_indices, Y_dev)
