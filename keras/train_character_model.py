@@ -16,12 +16,11 @@ from utils import read_csv, get_char_counts_from_csv, index_to_one_hot
 
 
 X_train, Y_train = read_csv('data/train.csv') 
-X_test, Y_test = read_csv('data/test.csv') 
+X_dev, Y_dev = read_csv('data/dev.csv') 
 
-# maxLen = max(len(max(X_train, key=len)), len(max(X_test, key=len)))
-maxLen = len(max(X_train, key=len))
+maxLen = max(len(max(X_train, key=len)), len(max(X_dev, key=len)))
 
-counts = get_char_counts_from_csv('data/train.csv') + get_char_counts_from_csv('data/test.csv') 
+counts = get_char_counts_from_csv('data/train.csv') + get_char_counts_from_csv('data/dev.csv') 
 most_common = counts.most_common()
 char_to_index = {x:i for i, (x, _) in enumerate(most_common)}
 index_to_char = {i:x for i, (x, _) in enumerate(most_common)}
@@ -39,8 +38,8 @@ model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accurac
 tensorboard = TensorBoard(log_dir="logs/character-model/{}".format(time()))
 model.fit(X_train_indices, Y_train, epochs = 20, batch_size = 6, shuffle=True, callbacks = [tensorboard])
 
-X_test_indices = strings_to_character_vecs(X_test, char_to_index, maxLen, alphabet_size)
-loss, acc = model.evaluate(X_test_indices, Y_test)
+X_dev_indices = strings_to_character_vecs(X_dev, char_to_index, maxLen, alphabet_size)
+loss, acc = model.evaluate(X_dev_indices, Y_dev)
 model.save('character_model.h5')
 print()
-print("Test accuracy = ", acc)
+print("Dev accuracy = ", acc)

@@ -13,7 +13,7 @@ from models import Word_Model
 from utils import read_csv, read_glove_vecs
 
 X_train, Y_train = read_csv('data/train.csv') 
-X_test, Y_test = read_csv('data/test.csv') 
+X_test, Y_test = read_csv('data/dev.csv') 
 
 maxLen = len(max(X_train, key=len).split())
 

@@ -21,7 +21,7 @@ def pretrained_embedding_layer(word_to_vec_map, word_to_index):
     for word, index in word_to_index.items():
         emb_matrix[index, :] = word_to_vec_map[word]
     
-    embedding_layer = Embedding(vocab_len, emb_dim, trainable = False)
+    embedding_layer = Embedding(vocab_len, emb_dim, trainable = False) # can also set mask_zero = True
 
     embedding_layer.build((None,))
     embedding_layer.set_weights([emb_matrix]) # now it's pretrained!
