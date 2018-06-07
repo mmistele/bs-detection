@@ -11,7 +11,7 @@ from keras.initializers import glorot_uniform
 from keras.utils import to_categorical
 
 from embedding import strings_to_character_vecs
-from models import Character_Model_1
+from models import Character_Model_1, Character_Model_2
 from utils import read_csv, get_char_counts_from_csv, index_to_one_hot
 
 
@@ -31,7 +31,7 @@ char_to_vec_map = {x : index_to_one_hot(i, alphabet_size) for i, (x, _) in enume
 X_train_indices = strings_to_character_vecs(X_train, char_to_index, maxLen, alphabet_size)
 print(X_train_indices.shape)
 
-model = Character_Model_1((X_train_indices.shape[1], X_train_indices.shape[2]))
+model = Character_Model_2((X_train_indices.shape[1], X_train_indices.shape[2]))
 
 optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, decay=0.0, epsilon=None)
 model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])

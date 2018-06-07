@@ -3,6 +3,8 @@ import numpy as np
 from keras.models import Model
 from keras.layers import Dense, Input, Dropout, LSTM, Activation, Masking, GlobalAveragePooling1D
 
+from custom_layers import MeanPool
+
 from embedding import pretrained_embedding_layer
 
 def Character_Model_1(input_shape):
@@ -20,7 +22,8 @@ def Character_Model_1(input_shape):
     sentences = Input(shape = input_shape, dtype = np.float32)
 
     X = Masking(mask_value = 0., input_shape=input_shape)(sentences)
-    X = LSTM(128, dropout=0.2, recurrent_dropout=0.0)(X)
+    # X = LSTM(128, return_sequences = True, dropout=0.2, recurrent_dropout=0.2)(X)
+    X = LSTM(128, dropout=0.2, recurrent_dropout=0.2)(X)
     X = Dense(1)(X)
     X = Activation('sigmoid')(X)
 
@@ -30,9 +33,12 @@ def Character_Model_1(input_shape):
 def Character_Model_2(input_shape):
     sentences = Input(shape = input_shape, dtype = np.float32)
 
-    X = LSTM(128, return_sequences = True, dropout=0.2, recurrent_dropout=0.0)(sentences)
-    X = Masking(mask_value = 0., input_shape=(input_shape[0], 128))(X)
-    X = GlobalAveragePooling1D()(X)
+    X = Masking(mask_value = 0., input_shape=input_shape)(sentences)
+    X = LSTM(128, return_sequences = True, dropout=0.2, recurrent_dropout=0.2)(X)
+    X = LSTM(128, return_sequences = True, dropout=0.2, recurrent_dropout=0.2)(X)
+    # X = Masking(mask_value = 0., input_shape=(input_shape[0], 128))(X)
+
+    X = MeanPool()(X)
     X = Dense(1)(X)
     X = Activation('sigmoid')(X)
 
