@@ -31,7 +31,15 @@ def Character_Model(input_shape):
     X = Dropout(0.9)(X)
 
     # Another LSTM layer, but just returns one output
-    X = LSTM(128)(X)
+    X = LSTM(128)(X) 
+    # TODO: look at hidden weights of simpler model (just 1 layer RNN) for analysis
+    # TODO: to fix character-level, use return_sequences, average/max them and mask accordingly, then do dense
+    # TODO: make a bi-directional
+    # (could do simple attention [attend to itself])
+    # could try 1D CNNs at character level - much faster
+
+    # Dropout weights, number of cells stacked, # of hidden cell states, max vs. average
+
     X = Dropout(0.5)(X)
     # Propagating through a Dense layer with sigmoid activation to get back a scalar
     X = Dense(1)(X)

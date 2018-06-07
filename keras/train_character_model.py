@@ -4,6 +4,7 @@ from time import time
 from keras.callbacks import TensorBoard
 from keras.models import Model
 from keras.layers import Dense, Input, Dropout, LSTM, Activation
+from keras.optimizers import Adam
 from keras.layers.embeddings import Embedding
 from keras.preprocessing import sequence
 from keras.initializers import glorot_uniform
@@ -27,18 +28,15 @@ index_to_char = {i:x for i, (x, _) in enumerate(most_common)}
 alphabet_size = len(counts)
 char_to_vec_map = {x : index_to_one_hot(i, alphabet_size) for i, (x, _) in enumerate(most_common)}
 
-
 # m by maxLen by alphabet_size
 X_train_indices = strings_to_character_vecs(X_train, char_to_index, maxLen, alphabet_size)
 print(X_train_indices.shape)
 
 model = Character_Model((X_train_indices.shape[1], X_train_indices.shape[2]))
 
-# might want to change the metric here
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, decay=0.0, epsilon=None)
+model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 tensorboard = TensorBoard(log_dir="logs/character-model/{}".format(time()))
-
 model.fit(X_train_indices, Y_train, epochs = 20, batch_size = 6, shuffle=True, callbacks = [tensorboard])
 
 X_test_indices = strings_to_character_vecs(X_test, char_to_index, maxLen, alphabet_size)

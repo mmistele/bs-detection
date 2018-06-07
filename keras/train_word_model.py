@@ -4,6 +4,7 @@ from time import time
 from keras.callbacks import TensorBoard
 from keras.models import Model
 from keras.layers import Dense, Input, Dropout, LSTM, Activation
+from keras.optimizers import Adam
 from keras.preprocessing import sequence
 from keras.initializers import glorot_uniform
 
@@ -17,18 +18,14 @@ X_test, Y_test = read_csv('data/test.csv')
 maxLen = len(max(X_train, key=len).split())
 
 word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('data/glove.6B.50d.txt')
-
 embedding_layer = pretrained_embedding_layer(word_to_vec_map, word_to_index)
 
 model = Word_Model((maxLen,), word_to_vec_map, word_to_index)
 
-# might want to change the metric here
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, decay=0.0)
+model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 X_train_indices = strings_to_word_indices(X_train, word_to_index, maxLen)
-
 tensorboard = TensorBoard(log_dir="logs/word-model/{}".format(time()))
-
 model.fit(X_train_indices, Y_train, epochs = 20, batch_size = 6, shuffle=True, callbacks = [tensorboard])
 
 X_test_indices = strings_to_word_indices(X_test, word_to_index, max_len = maxLen)
