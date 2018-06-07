@@ -1,11 +1,11 @@
 import numpy as np
 
 from keras.models import Model
-from keras.layers import Dense, Input, Dropout, LSTM, Activation
+from keras.layers import Dense, Input, Dropout, LSTM, Activation, Masking, GlobalAveragePooling1D
 
 from embedding import pretrained_embedding_layer
 
-def Character_Model(input_shape):
+def Character_Model_1(input_shape):
     """
     Function creating the Character Model-V1 model's graph.
     
@@ -16,38 +16,29 @@ def Character_Model(input_shape):
 
     Returns:
     model -- a model instance in Keras
-    """
-    
+    """    
     sentences = Input(shape = input_shape, dtype = np.float32)
-    # Propagate the sentences through an LSTM layer with 128-dimensional hidden state
-    X = LSTM(128, return_sequences = True)(sentences)
-    # Adds dropout with probability 0.5
-    X = Dropout(0.5)(X)
 
-    X = LSTM(128, return_sequences = True)(X)
-    X = Dropout(0.9)(X)
-
-    X = LSTM(128, return_sequences = True)(X)
-    X = Dropout(0.9)(X)
-
-    # Another LSTM layer, but just returns one output
-    X = LSTM(128)(X) 
-    # TODO: look at hidden weights of simpler model (just 1 layer RNN) for analysis
-    # TODO: to fix character-level, use return_sequences, average/max them and mask accordingly, then do dense
-    # TODO: make a bi-directional
-    # (could do simple attention [attend to itself])
-    # could try 1D CNNs at character level - much faster
-
-    # Dropout weights, number of cells stacked, # of hidden cell states, max vs. average
-
-    X = Dropout(0.5)(X)
-    # Propagating through a Dense layer with sigmoid activation to get back a scalar
+    X = Masking(mask_value = 0., input_shape=input_shape)(sentences)
+    X = LSTM(128, dropout=0.2, recurrent_dropout=0.0)(X)
     X = Dense(1)(X)
     X = Activation('sigmoid')(X)
 
     model = Model(inputs = sentences, outputs = X)
-
     return model
+
+def Character_Model_2(input_shape):
+    sentences = Input(shape = input_shape, dtype = np.float32)
+
+    X = LSTM(128, return_sequences = True, dropout=0.2, recurrent_dropout=0.0)(sentences)
+    X = Masking(mask_value = 0., input_shape=(input_shape[0], 128))(X)
+    X = GlobalAveragePooling1D()(X)
+    X = Dense(1)(X)
+    X = Activation('sigmoid')(X)
+
+    model = Model(inputs = sentences, outputs = X)
+    return model
+
 
 def Word_Model(input_shape, word_to_vec_map, word_to_index):
     """
