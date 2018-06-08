@@ -1,7 +1,7 @@
 import numpy as np
 
 from keras.models import Model
-from keras.layers import Dense, Input, Dropout, LSTM, Activation, Masking, Bidirectional
+from keras.layers import Dense, Input, Dropout, LSTM, Activation, Masking, Bidirectional, Lambda
 
 from custom_layers import MeanPool
 
@@ -23,11 +23,17 @@ def Character_Model_1(input_shape):
 
     X = Masking(mask_value = 0., input_shape=input_shape)(sentences)
 
-    X = Bidirectional(LSTM(128, return_sequences = False, dropout=0.2, recurrent_dropout=0.2), merge_mode='ave')(X)
+    # X = Bidirectional(LSTM(128, return_sequences = False, dropout=0.2, recurrent_dropout=0.2), merge_mode='ave')(X)
+    X = LSTM(128, return_sequences = True, dropout=0.2, recurrent_dropout=0.2, name='LSTM1')(X)
+    def get_last(X):
+        return X[:,-1,:]
+    X = Lambda(get_last, name = 'LSTM-last')(X)
+
     # X = Bidirectional(LSTM(128, return_sequences = True, dropout=0.2, recurrent_dropout=0.2))(X)
     # X = LSTM(128, dropout=0.2, recurrent_dropout=0.2)(X)
-    X = Dense(1)(X)
-    X = Activation('sigmoid')(X)
+    
+    X = Dense(1, name='Dense1')(X)
+    X = Activation('sigmoid', name='output_layer')(X)
 
     model = Model(inputs = sentences, outputs = X)
     return model
