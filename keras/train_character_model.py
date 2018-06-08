@@ -19,6 +19,7 @@ X_train, Y_train = read_csv('data/train.csv')
 X_dev, Y_dev = read_csv('data/dev.csv') 
 
 maxLen = max(len(max(X_train, key=len)), len(max(X_dev, key=len)))
+print "Max length: %s" % maxLen
 
 counts = get_char_counts_from_csv('data/train.csv') + get_char_counts_from_csv('data/dev.csv') 
 most_common = counts.most_common()
@@ -34,9 +35,9 @@ print(X_train_indices.shape)
 model = Character_Model_1((None, X_train_indices.shape[2]))
 
 optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, decay=0.0, epsilon=None)
-model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy', 'loss'])
+model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 tensorboard = TensorBoard(log_dir="logs/character-model/{}".format(time()))
-model.fit(X_train_indices, Y_train, epochs = 1, batch_size = 6, shuffle=True, callbacks = [tensorboard], validation_split = 0.2)
+model.fit(X_train_indices, Y_train, epochs = 20, batch_size = 20, shuffle=True, callbacks = [tensorboard], validation_split = 0.2)
 
 X_dev_indices = strings_to_character_vecs(X_dev, char_to_index, maxLen, alphabet_size)
 loss, acc = model.evaluate(X_dev_indices, Y_dev)
