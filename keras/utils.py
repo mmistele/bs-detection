@@ -24,11 +24,12 @@ def read_glove_vecs(glove_file):
             words_to_index[w] = i
             index_to_words[i] = w
             i = i + 1
-        
-        UNK = len(words)
-        index_to_words[UNK] = 'UNK'
-        words_to_index['UNK'] = UNK 
-        word_to_vec_map['UNK'] = np.random.randn(50) # embedding dimension
+
+        # Add this back after test
+        # UNK = len(words)
+        # index_to_words[UNK] = 'UNK'
+        # words_to_index['UNK'] = UNK 
+        # word_to_vec_map['UNK'] = np.random.randn(50) # embedding dimension
 
     return words_to_index, index_to_words, word_to_vec_map
 

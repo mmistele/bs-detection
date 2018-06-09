@@ -48,7 +48,7 @@ def strings_to_word_indices(X, word_to_index, max_len):
         j = 0
         for w in sentence_words:
             if w not in word_to_index:
-               X_indices[i, j] = len(word_to_index) - 1
+               X_indices[i, j] = 0 # after test, change back to len(word_to_index) - 1
             else:
                 X_indices[i, j] = word_to_index[w]
             j = j+1
