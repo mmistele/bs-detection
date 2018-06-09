@@ -21,7 +21,7 @@ def pretrained_embedding_layer(word_to_vec_map, word_to_index):
     for word, index in word_to_index.items():
         emb_matrix[index, :] = word_to_vec_map[word]
     
-    embedding_layer = Embedding(vocab_len, emb_dim, trainable = False) # can also set mask_zero = True
+    embedding_layer = Embedding(vocab_len, emb_dim, trainable = False, mask_zero = True) # can also set mask_zero = True
 
     embedding_layer.build((None,))
     embedding_layer.set_weights([emb_matrix]) # now it's pretrained!
@@ -48,10 +48,35 @@ def strings_to_word_indices(X, word_to_index, max_len):
         j = 0
         for w in sentence_words:
             if w not in word_to_index:
-               X_indices[i, j] = 0 # HACK - fix soon
+               X_indices[i, j] = len(word_to_index) - 1
             else:
                 X_indices[i, j] = word_to_index[w]
             j = j+1
+    return X_indices
+
+def strings_to_word_indices_no_max(X, word_to_index, vocab_len):
+    """
+    Converts an array of strings into an array of indices corresponding to words in the string.
+    
+    Arguments:
+    X -- array of sentences (strings), of shape (m, 1)
+    word_to_index -- a dictionary containing the each word mapped to its index
+    max_len -- maximum number of words in a sentence. You can assume every sentence in X is no longer than this. 
+    
+    Returns:
+    X_indices -- array of indices corresponding to words in the sentences from X, of shape (m, max_len)
+    """
+
+    m = X.shape[0]
+    X_indices = []
+    for i in range(m):
+        X_indices.append([])
+        sentence_words = X[i].lower().split()
+        for w in sentence_words:
+            if w not in word_to_index:
+                X_indices[i].append(vocab_len)
+            else:
+                X_indices[i].append(word_to_index[w])
     return X_indices
 
 def strings_to_character_vecs(X, char_to_index, max_len, alphabet_size):
