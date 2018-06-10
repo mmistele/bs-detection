@@ -1,6 +1,7 @@
 import numpy as np
 from utils import read_csv, read_glove_vecs, get_char_counts_from_csv, index_to_one_hot
 from embedding import strings_to_character_vecs, strings_to_word_indices
+from keras.models import load_model
 import argparse
 
 parser = argparse.ArgumentParser(description='Load and test a model.')
