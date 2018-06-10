@@ -28,14 +28,14 @@ def pretrained_embedding_layer(word_to_vec_map, word_to_index):
 
     return embedding_layer
 
-def strings_to_word_indices(X, word_to_index, max_len):
+def strings_to_word_indices(X, word_to_index, max_len, legacy = False):
     """
     Converts an array of strings into an array of indices corresponding to words in the string.
     
     Arguments:
     X -- array of sentences (strings), of shape (m, 1)
     word_to_index -- a dictionary containing the each word mapped to its index
-    max_len -- maximum number of words in a sentence. You can assume every sentence in X is no longer than this. 
+    max_len -- maximum number of words in a sentence. Assumes every sentence in X is no longer than this. 
     
     Returns:
     X_indices -- array of indices corresponding to words in the sentences from X, of shape (m, max_len)
@@ -48,7 +48,10 @@ def strings_to_word_indices(X, word_to_index, max_len):
         j = 0
         for w in sentence_words:
             if w not in word_to_index:
-               X_indices[i, j] = len(word_to_index) - 1 # change to 0 for 2-level legacy version
+                if legacy:
+                    X_indices[i, j] = 0
+                else:
+                    X_indices[i, j] = len(word_to_index) - 1
             else:
                 X_indices[i, j] = word_to_index[w]
             j = j+1
@@ -56,15 +59,15 @@ def strings_to_word_indices(X, word_to_index, max_len):
 
 def strings_to_word_indices_no_max(X, word_to_index, vocab_len):
     """
-    Converts an array of strings into an array of indices corresponding to words in the string.
+    Unused at the moment, but might use it later.
     
     Arguments:
     X -- array of sentences (strings), of shape (m, 1)
     word_to_index -- a dictionary containing the each word mapped to its index
-    max_len -- maximum number of words in a sentence. You can assume every sentence in X is no longer than this. 
-    
+    voab_len -- size of the word vocabulary
+
     Returns:
-    X_indices -- array of indices corresponding to words in the sentences from X, of shape (m, max_len)
+    X_indices -- array of indices corresponding to words in the sentences from X
     """
 
     m = X.shape[0]
@@ -85,24 +88,15 @@ def strings_to_character_vecs(X, char_to_index, max_len, alphabet_size):
     
     Arguments:
     X -- array of sentences (strings), of shape (m, 1)
-    word_to_index -- a dictionary containing the each word mapped to its index
-    max_len -- maximum number of words in a sentence. You can assume every sentence in X is no longer than this. 
-    
+    char_to_index -- a dictionary containing each character mapped to its index
+    max_len -- maximum number of characters in a sentence
+    alphabet_size -- number of characters in the alphabet used in char_to_index
+
     Returns:
-    X_indices -- array of indices corresponding to words in the sentences from X, of shape (m, max_len)
+    X_indices -- array of indices corresponding to characters in the sentences from X, of shape (m, max_len)
     """
 
     m = X.shape[0]
-
-    # sequences = list()
-    # for i in range(m):
-    #     line = X[i].lower()
-    #     encoded_seq = [char_to_index[char] for char in line]
-    #     sequences.append(encoded_seq)
-    # X_vec = np.array([to_categorical(seq, num_classes=alphabet_size) for seq in sequences])
-    # import pdb; pdb.set_trace()
-    # return X_vec
-
 
     X_vec = np.zeros((m, max_len, alphabet_size))
     for i in range(m):
@@ -113,3 +107,12 @@ def strings_to_character_vecs(X, char_to_index, max_len, alphabet_size):
                 X_vec[i, j, char_to_index[c]] = 1.
             j = j+1
     return X_vec
+
+    # Another way in the works:
+    # sequences = list()
+    # for i in range(m):
+    #     line = X[i].lower()
+    #     encoded_seq = [char_to_index[char] for char in line]
+    #     sequences.append(encoded_seq)
+    # X_vec = np.array([to_categorical(seq, num_classes=alphabet_size) for seq in sequences])
+    # return X_vec

@@ -1,53 +1,45 @@
 import numpy as np
-from time import time
+from utils import read_csv, read_glove_vecs, get_char_counts_from_csv, index_to_one_hot
+from embedding import strings_to_character_vecs, strings_to_word_indices
+import argparse
 
-from keras.callbacks import TensorBoard
-from keras.models import Model, load_model
-from keras.layers import Dense, Input, Dropout, LSTM, Activation
-from keras.optimizers import Adam
-from keras.preprocessing import sequence
-from keras.initializers import glorot_uniform
+parser = argparse.ArgumentParser(description='Load and test a model.')
+parser.add_argument('model', metavar='M', nargs=1,
+                    help='the model filename (or path)')
+parser.add_argument('--legacy', dest='isLegacy', action='store_const',
+                    const=True, default=False,
+                    help='whether to use legacy word embeddings')
+parser.add_argument('--isCharacterModel', dest='isCharacterModel', action='store_const',
+                    const=True, default=False,
+                    help='whether the word model is a character model')
 
-from embedding import strings_to_word_indices, pretrained_embedding_layer
-from models import Word_Model
-from utils import read_csv, read_glove_vecs
-import numpy as np
-from time import time
+args = parser.parse_args()
 
-from keras.callbacks import TensorBoard
-from keras.models import Model
-from keras.layers import Dense, Input, Dropout, LSTM, Activation
-from keras.optimizers import Adam
-from keras.layers.embeddings import Embedding
-from keras.preprocessing import sequence
-from keras.initializers import glorot_uniform
-from keras.utils import to_categorical
-
-from embedding import strings_to_character_vecs
-from models import Character_Model_1, Character_Model_2
-from utils import read_csv, get_char_counts_from_csv, index_to_one_hot
-
-
-model = load_model('word_2lay_128dim_0.5drop_1dir_unmasked_99trainacc.h5')
-
-X_trained_on, _ = read_csv('data/train-big.csv')
-X_dev, Y_dev = read_csv('data/dev.csv')
+model = load_model(args.model)
 X_test, Y_test = read_csv('data/test.csv')
 
-# Word version
-maxLen = max(len(max(X_trained_on, key=len).split()), len(max(X_dev, key=len).split()))+10
-word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('data/glove.6B.50d.txt')
-X_test_indices = strings_to_word_indices(X_test, word_to_index, maxLen)
+# For the purposes of maxLen calculation
+x_trained_on_filename = 'data/train-big.csv'
+x_dev_used_filename = 'data/dev.csv'
+X_trained_on, _ = read_csv(x_trained_on_filename)
+X_dev, Y_dev = read_csv(x_dev_used_filename)
 
-# Character version
-# maxLen = max(len(max(X_trained_on, key=len)), len(max(X_dev, key=len)))
-# counts = get_char_counts_from_csv('data/train.csv') + get_char_counts_from_csv('data/dev.csv') 
-# most_common = counts.most_common()
-# char_to_index = {x:i for i, (x, _) in enumerate(most_common)}
-# index_to_char = {i:x for i, (x, _) in enumerate(most_common)}
-# alphabet_size = len(counts)
-# char_to_vec_map = {x : index_to_one_hot(i, alphabet_size) for i, (x, _) in enumerate(most_common)}
-# X_test_indices = strings_to_character_vecs(X_test, char_to_index, maxLen, alphabet_size)
+if args.isCharacterModel:
+    maxLen = max(len(max(X_trained_on, key=len)), len(max(X_dev, key=len)))
+    counts = get_char_counts_from_csv('data/train-big.csv') + get_char_counts_from_csv('data/dev.csv') 
+    most_common = counts.most_common()
+    char_to_index = {x:i for i, (x, _) in enumerate(most_common)}
+    index_to_char = {i:x for i, (x, _) in enumerate(most_common)}
+    alphabet_size = len(counts)
+    char_to_vec_map = {x : index_to_one_hot(i, alphabet_size) for i, (x, _) in enumerate(most_common)}
+    X_test_indices = strings_to_character_vecs(X_test, char_to_index, maxLen, alphabet_size)
+
+else:
+    maxLen = max(len(max(X_trained_on, key=len).split()), len(max(X_dev, key=len).split()))+10
+    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('data/glove.6B.50d.txt')
+    if args.isLegacy:
+        word_to_index, index_to_word, word_to_vec_map = read_glove_vecs_legacy('data/glove.6B.50d.txt')
+    X_test_indices = strings_to_word_indices(X_test, word_to_index, maxLen, args.isLegacy)
 
 loss, acc = model.evaluate(X_test_indices, Y_test)
 print()
