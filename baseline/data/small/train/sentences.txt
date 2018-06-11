@@ -1,4 +1,0 @@
-cat
-eat eat
-eat eat eat
-cat cat cat cat
