@@ -1,6 +1,5 @@
 # Gibberfish
-## Final project for CS 230: Deep Learning
-## by Matt Mistele & Bo Peng
+Final project for CS 230: Deep Learning by Matt Mistele & Bo Peng
 
 We trained RNNs to predict whether a sequence of words is a well-formed English sentence or a sequence of words randomly sampled from the corpus. 
 
